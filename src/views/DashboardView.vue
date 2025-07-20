@@ -202,6 +202,7 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { dashboardAPI } from '@/services/api'
 import AppNavigation from '@/components/AppNavigation.vue'
 import AppBar from '@/components/AppBar.vue'
 
@@ -209,6 +210,7 @@ const authStore = useAuthStore()
 const appStore = useAppStore()
 
 const loadingAccess = ref(false)
+const loadingStats = ref(false)
 const recentAccess = ref([])
 const recentAuthorizations = ref([])
 
@@ -216,28 +218,28 @@ const stats = ref([
   {
     title: 'Étudiants',
     subtitle: 'Inscrits dans le système',
-    value: '1,247',
+    value: '0',
     icon: 'mdi-account-group',
     color: 'primary'
   },
   {
     title: 'Salles',
     subtitle: 'Disponibles',
-    value: '24',
+    value: '0',
     icon: 'mdi-domain',
     color: 'success'
   },
   {
     title: 'Autorisations',
     subtitle: 'Actives',
-    value: '856',
+    value: '0',
     icon: 'mdi-key-variant',
     color: 'warning'
   },
   {
     title: 'Accès aujourd\'hui',
     subtitle: 'Tentatives d\'accès',
-    value: '142',
+    value: '0',
     icon: 'mdi-clock-outline',
     color: 'info'
   }
@@ -277,36 +279,39 @@ const accessHeaders = [
   { title: 'Date/Heure', key: 'date_entree', sortable: false }
 ]
 
+const loadStats = async () => {
+  loadingStats.value = true
+  try {
+    const response = await dashboardAPI.getStats()
+    
+    if (response.data.success) {
+      const data = response.data.stats
+      stats.value[0].value = data.etudiants?.toString() || '0'
+      stats.value[1].value = data.salles?.toString() || '0'
+      stats.value[2].value = data.autorisations?.toString() || '0'
+      stats.value[3].value = data.acces_aujourd_hui?.toString() || '0'
+    }
+  } catch (error) {
+    console.error('Erreur chargement statistiques:', error)
+    // Garder les valeurs par défaut en cas d'erreur
+  } finally {
+    loadingStats.value = false
+  }
+}
+
 const loadRecentAccess = async () => {
   loadingAccess.value = true
   try {
-    // Simulation de données (à remplacer par votre API)
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const response = await dashboardAPI.getRecentAccess(10)
     
-    recentAccess.value = [
-      {
-        id: 1,
-        etudiant: 'MUKAMBA Jean',
-        nom_salle: 'Salle Informatique A',
-        statut: 'AUTORISE',
-        date_entree: new Date().toISOString()
-      },
-      {
-        id: 2,
-        etudiant: 'NABINTU Marie',
-        nom_salle: 'Bibliothèque',
-        statut: 'AUTORISE',
-        date_entree: new Date(Date.now() - 3600000).toISOString()
-      },
-      {
-        id: 3,
-        etudiant: 'BAHATI Pierre',
-        nom_salle: 'Amphithéâtre',
-        statut: 'REFUSE',
-        date_entree: new Date(Date.now() - 7200000).toISOString()
-      }
-    ]
+    if (response.data.success) {
+      recentAccess.value = response.data.access.map(access => ({
+        ...access,
+        etudiant: `${access.nom || 'Inconnu'} ${access.prenom || ''}`
+      }))
+    }
   } catch (error) {
+    console.error('Erreur chargement accès récents:', error)
     appStore.showSnackbar('Erreur lors du chargement des accès', 'error')
   } finally {
     loadingAccess.value = false
@@ -315,27 +320,13 @@ const loadRecentAccess = async () => {
 
 const loadRecentAuthorizations = async () => {
   try {
-    // Simulation de données
-    recentAuthorizations.value = [
-      {
-        id: 1,
-        nom: 'MUKAMBA',
-        prenom: 'Jean',
-        nom_salle: 'Salle Informatique A',
-        niveau_acces: 'LECTURE',
-        date_creation: new Date().toISOString()
-      },
-      {
-        id: 2,
-        nom: 'NABINTU',
-        prenom: 'Marie',
-        nom_salle: 'Bibliothèque',
-        niveau_acces: 'LECTURE',
-        date_creation: new Date(Date.now() - 3600000).toISOString()
-      }
-    ]
+    const response = await dashboardAPI.getRecentAuthorizations(5)
+    
+    if (response.data.success) {
+      recentAuthorizations.value = response.data.authorizations
+    }
   } catch (error) {
-    console.error('Erreur chargement autorisations:', error)
+    console.error('Erreur chargement autorisations récentes:', error)
   }
 }
 
@@ -351,6 +342,7 @@ const formatDate = (dateString) => {
 
 onMounted(() => {
   authStore.initAuth()
+  loadStats()
   loadRecentAccess()
   loadRecentAuthorizations()
 })

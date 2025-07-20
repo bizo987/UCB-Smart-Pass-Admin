@@ -324,7 +324,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
-import { ucbAPI } from '@/services/api'
+import { studentsAPI, sallesAPI, autorisationsAPI, ucbAPI } from '@/services/api'
 import AppNavigation from '@/components/AppNavigation.vue'
 import AppBar from '@/components/AppBar.vue'
 
@@ -394,67 +394,42 @@ const filteredAutorisations = computed(() => {
 })
 
 const loadStudents = async () => {
-  // Simulation de données
-  students.value = [
-    {
-      id: 1,
-      matricule: '05/23.09319',
-      nom: 'MUKAMBA',
-      prenom: 'Jean',
-      display_name: '05/23.09319 - MUKAMBA Jean',
-      faculte: 'Sciences Informatiques',
-      promotion: '2023-2024'
-    },
-    {
-      id: 2,
-      matricule: '05/23.09320',
-      nom: 'NABINTU',
-      prenom: 'Marie',
-      display_name: '05/23.09320 - NABINTU Marie',
-      faculte: 'Sciences Informatiques',
-      promotion: '2023-2024'
+  try {
+    const response = await studentsAPI.getAll()
+    if (response.data.success) {
+      students.value = response.data.students.map(student => ({
+        ...student,
+        display_name: `${student.matricule} - ${student.nom} ${student.prenom}`
+      }))
     }
-  ]
+  } catch (error) {
+    console.error('Erreur chargement étudiants:', error)
+  }
 }
 
 const loadSalles = async () => {
-  // Simulation de données
-  salles.value = [
-    { id: 1, nom_salle: 'Salle Informatique A', localisation: 'Bâtiment Sciences - 1er étage' },
-    { id: 2, nom_salle: 'Amphithéâtre Central', localisation: 'Bâtiment Principal - RDC' },
-    { id: 3, nom_salle: 'Laboratoire Chimie', localisation: 'Bâtiment Sciences - 2ème étage' }
-  ]
+  try {
+    const response = await sallesAPI.getAll()
+    if (response.data.success) {
+      salles.value = response.data.salles
+    }
+  } catch (error) {
+    console.error('Erreur chargement salles:', error)
+  }
 }
 
 const loadAutorisations = async () => {
   loadingAutorisations.value = true
   try {
-    // Simulation de données
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const response = await autorisationsAPI.getAll()
     
-    autorisations.value = [
-      {
-        id: 1,
-        nom: 'MUKAMBA',
-        prenom: 'Jean',
-        matricule: '05/23.09319',
-        nom_salle: 'Salle Informatique A',
-        date_debut: '2024-01-01T08:00:00',
-        date_fin: '2024-12-31T18:00:00',
-        actif: true
-      },
-      {
-        id: 2,
-        nom: 'NABINTU',
-        prenom: 'Marie',
-        matricule: '05/23.09320',
-        nom_salle: 'Bibliothèque',
-        date_debut: '2024-01-01T08:00:00',
-        date_fin: '2024-12-31T20:00:00',
-        actif: true
-      }
-    ]
+    if (response.data.success) {
+      autorisations.value = response.data.autorisations
+    } else {
+      appStore.showSnackbar('Erreur lors du chargement des autorisations', 'error')
+    }
   } catch (error) {
+    console.error('Erreur chargement autorisations:', error)
     appStore.showSnackbar('Erreur lors du chargement des autorisations', 'error')
   } finally {
     loadingAutorisations.value = false
@@ -519,21 +494,25 @@ const setDefaultDates = () => {
 const saveIndividualAccess = async () => {
   saving.value = true
   try {
-    // Simulation de sauvegarde
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const response = await autorisationsAPI.createIndividual(individualForm.value)
     
-    appStore.showSnackbar('Accès individuel attribué avec succès', 'success')
-    
-    // Reset form
-    individualForm.value = {
-      etudiant_id: '',
-      salle_id: '',
-      date_debut: '',
-      date_fin: ''
+    if (response.data.success) {
+      appStore.showSnackbar('Accès individuel attribué avec succès', 'success')
+      
+      // Reset form
+      individualForm.value = {
+        etudiant_id: '',
+        salle_id: '',
+        date_debut: '',
+        date_fin: ''
+      }
+      setDefaultDates()
+    } else {
+      appStore.showSnackbar(response.data.message || 'Erreur lors de l\'attribution', 'error')
     }
-    setDefaultDates()
   } catch (error) {
-    appStore.showSnackbar('Erreur lors de l\'attribution', 'error')
+    console.error('Erreur attribution individuelle:', error)
+    appStore.showSnackbar(error.response?.data?.message || 'Erreur lors de l\'attribution', 'error')
   } finally {
     saving.value = false
   }
@@ -542,23 +521,27 @@ const saveIndividualAccess = async () => {
 const saveGroupAccess = async () => {
   saving.value = true
   try {
-    // Simulation de sauvegarde
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    const response = await autorisationsAPI.createGroup(groupForm.value)
     
-    const count = getStudentsCount()
-    appStore.showSnackbar(`Accès groupé attribué à ${count} étudiant(s)`, 'success')
-    
-    // Reset form
-    groupForm.value = {
-      faculte: '',
-      promotion: '',
-      salle_id: '',
-      date_debut: '',
-      date_fin: ''
+    if (response.data.success) {
+      const count = response.data.count || 0
+      appStore.showSnackbar(`Accès groupé attribué à ${count} étudiant(s)`, 'success')
+      
+      // Reset form
+      groupForm.value = {
+        faculte: '',
+        promotion: '',
+        salle_id: '',
+        date_debut: '',
+        date_fin: ''
+      }
+      setDefaultDates()
+    } else {
+      appStore.showSnackbar(response.data.message || 'Erreur lors de l\'attribution groupée', 'error')
     }
-    setDefaultDates()
   } catch (error) {
-    appStore.showSnackbar('Erreur lors de l\'attribution groupée', 'error')
+    console.error('Erreur attribution groupée:', error)
+    appStore.showSnackbar(error.response?.data?.message || 'Erreur lors de l\'attribution groupée', 'error')
   } finally {
     saving.value = false
   }
@@ -570,17 +553,17 @@ const revokeAccess = async (autorisation) => {
   }
 
   try {
-    // Simulation de révocation
-    await new Promise(resolve => setTimeout(resolve, 500))
+    const response = await autorisationsAPI.delete(autorisation.id)
     
-    const index = autorisations.value.findIndex(a => a.id === autorisation.id)
-    if (index !== -1) {
-      autorisations.value.splice(index, 1)
+    if (response.data.success) {
+      appStore.showSnackbar('Accès révoqué avec succès', 'success')
+      await loadAutorisations()
+    } else {
+      appStore.showSnackbar(response.data.message || 'Erreur lors de la révocation', 'error')
     }
-    
-    appStore.showSnackbar('Accès révoqué avec succès', 'success')
   } catch (error) {
-    appStore.showSnackbar('Erreur lors de la révocation', 'error')
+    console.error('Erreur révocation:', error)
+    appStore.showSnackbar(error.response?.data?.message || 'Erreur lors de la révocation', 'error')
   }
 }
 

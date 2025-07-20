@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import api from '@/services/api'
+import { authAPI } from '@/services/api'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -14,22 +14,11 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     
     try {
-      // Simulation d'authentification (à remplacer par votre API)
-      if (credentials.username === 'admin' && credentials.password === 'admin123') {
-        user.value = {
-          id: 1,
-          username: 'admin',
-          nom: 'Administrateur',
-          prenom: 'Système',
-          email: 'admin@ucbukavu.ac.cd'
-        }
-        
-        // Stocker dans localStorage
-        localStorage.setItem('smartaccess_user', JSON.stringify(user.value))
-        return true
-      } else {
-        throw new Error('Identifiants incorrects')
-      }
+      // Rediriger vers la page de connexion PHP
+      const loginUrl = `/public/login.php`
+      const params = new URLSearchParams(credentials).toString()
+      window.location.href = `${loginUrl}?${params}`
+      return true
     } catch (err) {
       error.value = err.message
       return false
@@ -38,16 +27,26 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const logout = () => {
-    user.value = null
-    localStorage.removeItem('smartaccess_user')
+  const checkAuth = async () => {
+    try {
+      const response = await authAPI.checkAuth()
+      if (response.data.success) {
+        user.value = response.data.user
+        return true
+      }
+      return false
+    } catch (error) {
+      return false
+    }
   }
 
-  const initAuth = () => {
-    const savedUser = localStorage.getItem('smartaccess_user')
-    if (savedUser) {
-      user.value = JSON.parse(savedUser)
-    }
+  const logout = () => {
+    // Rediriger vers la déconnexion PHP
+    window.location.href = '/public/logout.php'
+  }
+
+  const initAuth = async () => {
+    await checkAuth()
   }
 
   return {
@@ -57,6 +56,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     login,
     logout,
-    initAuth
+    initAuth,
+    checkAuth
   }
 })
