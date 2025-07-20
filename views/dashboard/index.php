@@ -1,48 +1,3 @@
-<?php
-/**
- * Tableau de bord administrateur
- * SmartAccess UCB - Université Catholique de Bukavu
- */
-
-require_once 'includes/session.php';
-require_once 'includes/db.php';
-require_once 'includes/functions.php';
-
-// Vérification de l'authentification
-requireAdmin();
-
-// Récupération des statistiques
-try {
-    $stats = [
-        'etudiants' => $conn->query("SELECT COUNT(*) as total FROM etudiants WHERE actif = 1")->fetch_assoc()['total'],
-        'salles' => $conn->query("SELECT COUNT(*) as total FROM salles WHERE actif = 1")->fetch_assoc()['total'],
-        'autorisations' => $conn->query("SELECT COUNT(*) as total FROM autorisations WHERE actif = 1")->fetch_assoc()['total'],
-        'acces_aujourd_hui' => $conn->query("SELECT COUNT(*) as total FROM historiques_acces WHERE DATE(date_entree) = CURDATE()")->fetch_assoc()['total']
-    ];
-    
-    // Récupération des derniers accès
-    $derniers_acces = getHistoriqueAcces(10);
-    
-    // Récupération des autorisations récentes
-    $autorisations_recentes = executeQuery(
-        "SELECT a.*, e.matricule, e.nom, e.prenom, s.nom_salle 
-         FROM autorisations a
-         JOIN etudiants e ON a.etudiant_id = e.id
-         JOIN salles s ON a.salle_id = s.id
-         WHERE a.actif = 1
-         ORDER BY a.date_creation DESC
-         LIMIT 5"
-    )->fetch_all(MYSQLI_ASSOC);
-    
-} catch (Exception $e) {
-    error_log("Erreur dashboard: " . $e->getMessage());
-    $stats = ['etudiants' => 0, 'salles' => 0, 'autorisations' => 0, 'acces_aujourd_hui' => 0];
-    $derniers_acces = [];
-    $autorisations_recentes = [];
-}
-
-$admin = getLoggedAdmin();
-?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -152,7 +107,7 @@ $admin = getLoggedAdmin();
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="dashboard.php">
+            <a class="navbar-brand fw-bold" href="/dashboard.php">
                 <i class="bi bi-shield-lock-fill me-2"></i>
                 SmartAccess UCB
             </a>
@@ -164,22 +119,22 @@ $admin = getLoggedAdmin();
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="dashboard.php">
+                        <a class="nav-link active" href="/dashboard.php">
                             <i class="bi bi-speedometer2 me-1"></i>Tableau de bord
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="admin/etudiants.php">
+                        <a class="nav-link" href="/admin/etudiants.php">
                             <i class="bi bi-people me-1"></i>Étudiants
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="admin/salles.php">
+                        <a class="nav-link" href="/admin/salles.php">
                             <i class="bi bi-building me-1"></i>Salles
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="admin/acces.php">
+                        <a class="nav-link" href="/admin/acces.php">
                             <i class="bi bi-key me-1"></i>Accès
                         </a>
                     </li>
@@ -192,7 +147,7 @@ $admin = getLoggedAdmin();
                             <?= htmlspecialchars($admin['prenom'] . ' ' . $admin['nom']) ?>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="logout.php">
+                            <li><a class="dropdown-item" href="/logout.php">
                                 <i class="bi bi-box-arrow-right me-2"></i>Déconnexion
                             </a></li>
                         </ul>
@@ -283,25 +238,25 @@ $admin = getLoggedAdmin();
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-3 mb-2">
-                                <a href="admin/etudiants.php" class="btn btn-primary quick-action-btn w-100">
+                                <a href="/admin/etudiants.php" class="btn btn-primary quick-action-btn w-100">
                                     <i class="bi bi-person-plus me-2"></i>
                                     Ajouter Étudiant
                                 </a>
                             </div>
                             <div class="col-md-3 mb-2">
-                                <a href="admin/salles.php" class="btn btn-success quick-action-btn w-100">
+                                <a href="/admin/salles.php" class="btn btn-success quick-action-btn w-100">
                                     <i class="bi bi-building-add me-2"></i>
                                     Ajouter Salle
                                 </a>
                             </div>
                             <div class="col-md-3 mb-2">
-                                <a href="admin/acces.php" class="btn btn-warning quick-action-btn w-100">
+                                <a href="/admin/acces.php" class="btn btn-warning quick-action-btn w-100">
                                     <i class="bi bi-key-fill me-2"></i>
                                     Gérer Accès
                                 </a>
                             </div>
                             <div class="col-md-3 mb-2">
-                                <a href="api/verifier_acces.php" class="btn btn-info quick-action-btn w-100" target="_blank">
+                                <a href="/api/verifier_acces.php" class="btn btn-info quick-action-btn w-100" target="_blank">
                                     <i class="bi bi-search me-2"></i>
                                     Tester API
                                 </a>
@@ -350,7 +305,7 @@ $admin = getLoggedAdmin();
                                                     </div>
                                                     <div>
                                                         <div class="fw-semibold">
-                                                            <?= htmlspecialchars($acces['nom'] . ' ' . $acces['prenom']) ?>
+                                                            <?= htmlspecialchars(($acces['nom'] ?? 'Inconnu') . ' ' . ($acces['prenom'] ?? '')) ?>
                                                         </div>
                                                         <small class="text-muted"><?= htmlspecialchars($acces['matricule_utilise']) ?></small>
                                                     </div>
@@ -369,7 +324,7 @@ $admin = getLoggedAdmin();
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <small><?= formatDate($acces['date_entree']) ?></small>
+                                                <small><?= (new DashboardController())->formatDate($acces['date_entree']) ?></small>
                                             </td>
                                         </tr>
                                         <?php endforeach; ?>
@@ -411,10 +366,10 @@ $admin = getLoggedAdmin();
                                     </small>
                                     <br>
                                     <small class="text-muted">
-                                        <?= formatDate($auth['date_creation']) ?>
+                                        <?= (new DashboardController())->formatDate($auth['date_creation']) ?>
                                     </small>
                                 </div>
-                                <span class="badge bg-success"><?= htmlspecialchars($auth['niveau_acces']) ?></span>
+                                <span class="badge bg-success"><?= htmlspecialchars($auth['niveau_acces'] ?? 'LECTURE') ?></span>
                             </div>
                             <?php endforeach; ?>
                         <?php endif; ?>

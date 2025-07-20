@@ -1,61 +1,3 @@
-<?php
-/**
- * Page de connexion administrateur
- * SmartAccess UCB - Université Catholique de Bukavu
- */
-
-require_once 'includes/session.php';
-require_once 'includes/db.php';
-
-// Redirection si déjà connecté
-if (isAdminLoggedIn()) {
-    header('Location: dashboard.php');
-    exit;
-}
-
-$error = '';
-$success = '';
-
-// Traitement du formulaire de connexion
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-    
-    if (empty($username) || empty($password)) {
-        $error = 'Veuillez remplir tous les champs.';
-    } else {
-        try {
-            // Recherche de l'administrateur
-            $stmt = $conn->prepare("SELECT * FROM admins WHERE username = ?");
-            $stmt->bind_param("s", $username);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            if ($admin = $result->fetch_assoc()) {
-                // Vérification du mot de passe (en production, utiliser password_hash/password_verify)
-                if ($password === $admin['password']) {
-                    // Connexion réussie
-                    loginAdmin($admin);
-                    
-                    // Redirection vers la page demandée ou dashboard
-                    $redirectUrl = $_SESSION['redirect_after_login'] ?? 'dashboard.php';
-                    unset($_SESSION['redirect_after_login']);
-                    
-                    header("Location: $redirectUrl");
-                    exit;
-                } else {
-                    $error = 'Mot de passe incorrect.';
-                }
-            } else {
-                $error = 'Nom d\'utilisateur introuvable.';
-            }
-        } catch (Exception $e) {
-            $error = 'Erreur de connexion. Veuillez réessayer.';
-            error_log("Erreur login: " . $e->getMessage());
-        }
-    }
-}
-?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -118,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="p-4">
                         <h4 class="text-center mb-4 text-dark">Connexion Administrateur</h4>
                         
-                        <?php if ($error): ?>
+                        <?php if (isset($error) && $error): ?>
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                                 <?= htmlspecialchars($error) ?>
@@ -126,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         <?php endif; ?>
                         
-                        <?php if ($success): ?>
+                        <?php if (isset($success) && $success): ?>
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 <i class="bi bi-check-circle-fill me-2"></i>
                                 <?= htmlspecialchars($success) ?>
