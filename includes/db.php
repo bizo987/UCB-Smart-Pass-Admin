@@ -8,7 +8,7 @@
 $config = [
     'host' => 'localhost',
     'username' => 'root',
-    'password' => '',
+    'password' => '1234',
     'database' => 'smartaccess_ucb',
     'charset' => 'utf8mb4'
 ];

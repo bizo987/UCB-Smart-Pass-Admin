@@ -22,46 +22,127 @@ $admin = getLoggedAdmin();
     <title>Gestion des Accès - SmartAccess UCB</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; }
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-surface: #FEF7FF;
+            --md-sys-color-on-surface: #1D1B20;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-error: #BA1A1A;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #FFDAD6;
+            --md-sys-color-on-error-container: #410002;
         }
+        
+        * {
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        body { 
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        .navbar {
+            background: var(--md-sys-color-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+        
         .content-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            background: var(--md-sys-color-surface);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            border: 1px solid var(--md-sys-color-outline);
             overflow: hidden;
         }
+        
         .content-card .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
             border: none;
             padding: 1rem 1.5rem;
         }
+        
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
             border: none;
+            border-radius: 20px;
+            padding: 10px 24px;
+            font-weight: 500;
         }
+        
         .btn-primary:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            background: color-mix(in srgb, var(--md-sys-color-primary) 85%, black);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
         }
+        
+        .form-control, .form-select {
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 4px;
+            padding: 16px 12px;
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .alert-success {
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+        }
+        
+        .alert-danger {
+            background: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+        }
+        
+        .alert-info {
+            background: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+        
         .loading-spinner {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
+            border: 3px solid color-mix(in srgb, currentColor 30%, transparent);
             border-radius: 50%;
-            border-top-color: #fff;
+            border-top-color: currentColor;
             animation: spin 1s ease-in-out infinite;
         }
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        
         .nav-pills .nav-link.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
         }
+        
         .tab-content {
             padding: 1.5rem;
         }
@@ -139,7 +220,7 @@ $admin = getLoggedAdmin();
                                         data-bs-target="#individual" 
                                         type="button" 
                                         role="tab">
-                                    <i class="bi bi-person me-2"></i>
+                                    <span class="material-icons me-2">person</span>
                                     Attribution Individuelle
                                 </button>
                             </li>
@@ -150,7 +231,7 @@ $admin = getLoggedAdmin();
                                         data-bs-target="#group" 
                                         type="button" 
                                         role="tab">
-                                    <i class="bi bi-people me-2"></i>
+                                    <span class="material-icons me-2">groups</span>
                                     Attribution Groupée
                                 </button>
                             </li>
@@ -162,7 +243,7 @@ $admin = getLoggedAdmin();
                                         type="button" 
                                         role="tab"
                                         @click="loadAutorisations">
-                                    <i class="bi bi-list me-2"></i>
+                                    <span class="material-icons me-2">list</span>
                                     Liste des Autorisations
                                 </button>
                             </li>
@@ -175,7 +256,7 @@ $admin = getLoggedAdmin();
                             <div class="row">
                                 <div class="col-lg-6">
                                     <h5 class="mb-3">
-                                        <i class="bi bi-person-plus me-2"></i>
+                                        <span class="material-icons me-2">person_add</span>
                                         Attribuer un accès individuel
                                     </h5>
                                     
@@ -205,15 +286,6 @@ $admin = getLoggedAdmin();
                                         </div>
 
                                         <div class="mb-3">
-                                            <label class="form-label">Niveau d'accès</label>
-                                            <select class="form-select" v-model="individualForm.niveau_acces">
-                                                <option value="LECTURE">Lecture</option>
-                                                <option value="ECRITURE">Écriture</option>
-                                                <option value="ADMIN">Administrateur</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="form-label">Date de début</label>
@@ -238,7 +310,7 @@ $admin = getLoggedAdmin();
                                                 class="btn btn-primary"
                                                 :disabled="loading">
                                             <span v-if="loading" class="loading-spinner me-2"></span>
-                                            <i v-else class="bi bi-check-lg me-2"></i>
+                                            <span v-else class="material-icons me-2">check</span>
                                             Attribuer l'accès
                                         </button>
                                     </form>
@@ -251,7 +323,7 @@ $admin = getLoggedAdmin();
                             <div class="row">
                                 <div class="col-lg-8">
                                     <h5 class="mb-3">
-                                        <i class="bi bi-people-fill me-2"></i>
+                                        <span class="material-icons me-2">groups</span>
                                         Attribution groupée par faculté/promotion
                                     </h5>
                                     
@@ -276,7 +348,7 @@ $admin = getLoggedAdmin();
                                                             @click="loadFacultesFromUCB"
                                                             :disabled="loadingFacultes">
                                                         <span v-if="loadingFacultes" class="loading-spinner me-1"></span>
-                                                        <i v-else class="bi bi-download me-1"></i>
+                                                        <span v-else class="material-icons me-1">download</span>
                                                         Charger depuis UCB
                                                     </button>
                                                 </div>
@@ -335,7 +407,7 @@ $admin = getLoggedAdmin();
                                         <!-- Aperçu des étudiants concernés -->
                                         <div v-if="groupForm.faculte && groupForm.promotion" class="mb-3">
                                             <div class="alert alert-info">
-                                                <i class="bi bi-info-circle me-2"></i>
+                                                <span class="material-icons me-2">info</span>
                                                 <strong>Étudiants concernés:</strong> 
                                                 {{ getStudentsCount() }} étudiant(s) de la faculté "{{ groupForm.faculte }}" 
                                                 promotion "{{ groupForm.promotion }}"
@@ -346,7 +418,7 @@ $admin = getLoggedAdmin();
                                                 class="btn btn-primary"
                                                 :disabled="loading">
                                             <span v-if="loading" class="loading-spinner me-2"></span>
-                                            <i v-else class="bi bi-people-fill me-2"></i>
+                                            <span v-else class="material-icons me-2">groups</span>
                                             Attribuer l'accès groupé
                                         </button>
                                     </form>
@@ -358,11 +430,11 @@ $admin = getLoggedAdmin();
                         <div class="tab-pane fade" id="list" role="tabpanel">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 class="mb-0">
-                                    <i class="bi bi-list-ul me-2"></i>
+                                    <span class="material-icons me-2">list</span>
                                     Autorisations Actives ({{ autorisations.length }})
                                 </h5>
                                 <button class="btn btn-outline-primary btn-sm" @click="loadAutorisations">
-                                    <i class="bi bi-arrow-clockwise"></i>
+                                    <span class="material-icons">refresh</span>
                                     Actualiser
                                 </button>
                             </div>
@@ -371,7 +443,7 @@ $admin = getLoggedAdmin();
                             <div class="mb-3">
                                 <div class="input-group">
                                     <span class="input-group-text">
-                                        <i class="bi bi-search"></i>
+                                        <span class="material-icons">search</span>
                                     </span>
                                     <input type="text" 
                                            class="form-control" 
@@ -389,7 +461,6 @@ $admin = getLoggedAdmin();
                                             <th>Étudiant</th>
                                             <th>Matricule</th>
                                             <th>Salle</th>
-                                            <th>Niveau</th>
                                             <th>Période</th>
                                             <th>Statut</th>
                                             <th>Actions</th>
@@ -397,13 +468,13 @@ $admin = getLoggedAdmin();
                                     </thead>
                                     <tbody>
                                         <tr v-if="loading && autorisations.length === 0">
-                                            <td colspan="7" class="text-center py-4">
+                                            <td colspan="6" class="text-center py-4">
                                                 <div class="loading-spinner me-2"></div>
                                                 Chargement des autorisations...
                                             </td>
                                         </tr>
                                         <tr v-else-if="filteredAutorisations.length === 0">
-                                            <td colspan="7" class="text-center py-4 text-muted">
+                                            <td colspan="6" class="text-center py-4 text-muted">
                                                 <i class="bi bi-inbox fs-1 mb-3"></i>
                                                 <p>Aucune autorisation trouvée.</p>
                                             </td>
@@ -424,11 +495,6 @@ $admin = getLoggedAdmin();
                                             </td>
                                             <td>{{ auth.nom_salle }}</td>
                                             <td>
-                                                <span :class="['badge', getBadgeClass(auth.niveau_acces)]">
-                                                    {{ auth.niveau_acces }}
-                                                </span>
-                                            </td>
-                                            <td>
                                                 <small>
                                                     Du {{ formatDate(auth.date_debut) }}<br>
                                                     Au {{ formatDate(auth.date_fin) }}
@@ -443,7 +509,7 @@ $admin = getLoggedAdmin();
                                                 <button class="btn btn-sm btn-outline-danger" 
                                                         @click="revokeAccess(auth)"
                                                         title="Révoquer l'accès">
-                                                    <i class="bi bi-x-circle"></i>
+                                                    <span class="material-icons">cancel</span>
                                                 </button>
                                             </td>
                                         </tr>
@@ -457,15 +523,15 @@ $admin = getLoggedAdmin();
         </div>
 
         <!-- Alertes -->
-        <transition name="fade">
-            <div v-if="alert.show" 
-                 :class="['alert', 'alert-' + alert.type, 'alert-dismissible', 'fade', 'show']" 
-                 role="alert">
-                <i :class="['bi', alert.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle', 'me-2']"></i>
-                {{ alert.message }}
-                <button type="button" class="btn-close" @click="hideAlert"></button>
-            </div>
-        </transition>
+        <div v-if="alert.show" 
+             :class="['alert', 'alert-' + alert.type, 'alert-dismissible']" 
+             role="alert">
+            <span :class="['material-icons', 'me-2']">
+                {{ alert.type === 'success' ? 'check_circle' : 'warning' }}
+            </span>
+            {{ alert.message }}
+            <button type="button" class="btn-close" @click="hideAlert" aria-label="Close"></button>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -489,7 +555,6 @@ $admin = getLoggedAdmin();
                     individualForm: {
                         etudiant_id: '',
                         salle_id: '',
-                        niveau_acces: 'LECTURE',
                         date_debut: '',
                         date_fin: ''
                     },
@@ -559,14 +624,31 @@ $admin = getLoggedAdmin();
                         const response = await fetch('https://akhademie.ucbukavu.ac.cd/api/v1/school/entity-main-list?entity_id=undefined&promotion_id=1&traditional=undefined');
                         const data = await response.json();
                         
-                        if (data && data.entities) {
-                            this.facultes = data.entities;
-                        }
-                        if (data && data.promotions) {
-                            this.promotions = data.promotions;
-                        }
+                        console.log('Réponse API UCB facultés:', data); // Debug
                         
-                        this.showAlert('success', 'Données UCB chargées avec succès');
+                        if (data && data.data && data.data.entities && data.message === "Request was successful") {
+                            this.facultes = data.data.entities.map(entity => ({
+                                id: entity.id,
+                                name: entity.label || entity.title,
+                                title: entity.title
+                            }));
+                            
+                            this.promotions = data.data.promotions.map(promotion => ({
+                                id: promotion.id,
+                                name: promotion.label || promotion.title,
+                                title: promotion.title,
+                                entityId: promotion.entityId,
+                                level: promotion.level
+                            }));
+                            
+                            console.log('Facultés chargées:', this.facultes);
+                            console.log('Promotions chargées:', this.promotions);
+                            
+                            this.showAlert('success', 'Données UCB chargées avec succès');
+                        } else {
+                            console.log('Erreur structure données UCB:', data);
+                            this.showAlert('danger', 'Erreur dans la structure des données UCB');
+                        }
                     } catch (error) {
                         console.error('Erreur chargement UCB:', error);
                         this.showAlert('danger', 'Erreur lors du chargement des données UCB');
@@ -575,12 +657,19 @@ $admin = getLoggedAdmin();
                     }
                 },
 
+
                 loadPromotions() {
                     if (this.groupForm.faculte) {
                         // Filtrer les promotions selon la faculté sélectionnée
-                        this.filteredPromotions = this.promotions.filter(promotion => 
-                            promotion.entity_name === this.groupForm.faculte
-                        );
+                        const selectedFaculte = this.facultes.find(f => f.name === this.groupForm.faculte);
+                        if (selectedFaculte) {
+                            this.filteredPromotions = this.promotions.filter(promotion => 
+                                promotion.entityId === selectedFaculte.id
+                            );
+                            console.log('Promotions filtrées pour', selectedFaculte.name, ':', this.filteredPromotions);
+                        } else {
+                            this.filteredPromotions = [];
+                        }
                     } else {
                         this.filteredPromotions = [];
                     }
@@ -716,7 +805,6 @@ $admin = getLoggedAdmin();
                     this.individualForm = {
                         etudiant_id: '',
                         salle_id: '',
-                        niveau_acces: 'LECTURE',
                         date_debut: '',
                         date_fin: ''
                     };
@@ -742,15 +830,6 @@ $admin = getLoggedAdmin();
                         hour: '2-digit',
                         minute: '2-digit'
                     });
-                },
-
-                getBadgeClass(niveau) {
-                    switch (niveau) {
-                        case 'LECTURE': return 'bg-info';
-                        case 'ECRITURE': return 'bg-warning';
-                        case 'ADMIN': return 'bg-danger';
-                        default: return 'bg-secondary';
-                    }
                 },
 
                 showAlert(type, message) {
